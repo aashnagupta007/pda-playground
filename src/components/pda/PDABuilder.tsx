@@ -205,8 +205,9 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
                       </Button>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <div ref={transitionsEndRef} />
             </div>
 
             {/* Initial stack symbol */}
