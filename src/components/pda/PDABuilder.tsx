@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { PDAConfig, PDAState, PDATransition, EPSILON } from '@/lib/pda-types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Save, Upload } from 'lucide-react';
 import { EXAMPLE_PDAS } from '@/lib/pda-examples';
 
