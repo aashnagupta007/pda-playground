@@ -65,6 +65,7 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
       stackPush: EPSILON,
     };
     onConfigChange({ ...config, transitions: [...config.transitions, t] });
+    setTimeout(() => transitionsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   };
 
   const updateTransition = (id: string, field: keyof PDATransition, value: string) => {
