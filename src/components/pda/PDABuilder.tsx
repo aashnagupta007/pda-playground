@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { PDAConfig, PDAState, PDATransition, EPSILON } from '@/lib/pda-types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Save, Upload } from 'lucide-react';
 import { EXAMPLE_PDAS } from '@/lib/pda-examples';
 
@@ -18,6 +17,7 @@ let transCounter = 0;
 
 export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
   const [showBuilder, setShowBuilder] = useState(false);
+  const transitionsEndRef = useRef<HTMLDivElement>(null);
 
   const addState = () => {
     const id = `q${config.states.length}`;
@@ -65,6 +65,7 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
       stackPush: EPSILON,
     };
     onConfigChange({ ...config, transitions: [...config.transitions, t] });
+    setTimeout(() => transitionsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   };
 
   const updateTransition = (id: string, field: keyof PDATransition, value: string) => {
@@ -132,7 +133,7 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
       </div>
 
       {showBuilder && (
-        <ScrollArea className="max-h-[400px]">
+        <div className="max-h-[400px] overflow-auto">
           <div className="flex flex-col gap-4 pr-3">
             {/* States */}
             <div>
@@ -204,8 +205,9 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
                       </Button>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                <div ref={transitionsEndRef} />
             </div>
 
             {/* Initial stack symbol */}
@@ -218,7 +220,7 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
               />
             </div>
           </div>
-        </ScrollArea>
+        </div>
       )}
     </div>
   );
