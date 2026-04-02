@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, SkipForward, RotateCcw, Pause, ChevronRight } from 'lucide-react';
+import { Play, SkipForward, SkipBack, RotateCcw, Pause, ChevronRight } from 'lucide-react';
+import { AcceptanceMode } from '@/lib/pda-types';
 import { motion } from 'framer-motion';
 
 const PDASimulator = () => {
