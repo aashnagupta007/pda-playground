@@ -6,6 +6,23 @@ import {
   EPSILON,
 } from './pda-types';
 
+function checkAcceptance(
+  config: PDAConfig,
+  stateId: string,
+  inputIndex: number,
+  inputLength: number,
+  stack: string[]
+): boolean {
+  if (inputIndex < inputLength) return false;
+  const state = config.states.find(s => s.id === stateId);
+  const mode = config.acceptanceMode || 'final-state';
+  const byFinalState = !!state?.isAccepting;
+  const byEmptyStack = stack.length === 0;
+  if (mode === 'final-state') return byFinalState;
+  if (mode === 'empty-stack') return byEmptyStack;
+  return byFinalState || byEmptyStack; // 'both'
+}
+
 interface Configuration {
   stateId: string;
   inputIndex: number;
@@ -89,7 +106,7 @@ export function simulatePDA(
     if (transitions.length === 0) {
       // Dead end - check if accepted
       const state = config.states.find((s) => s.id === stateId);
-      const accepted = inputIndex >= inputString.length && !!state?.isAccepting;
+      const accepted = checkAcceptance(config, stateId, inputIndex, inputString.length, stack);
       paths.push({ steps, accepted });
       continue;
     }
@@ -130,9 +147,7 @@ export function simulatePDA(
       );
 
       if (nextTransitions.length === 0) {
-        const endState = config.states.find((s) => s.id === t.toState);
-        const accepted =
-          newInputIndex >= inputString.length && !!endState?.isAccepting;
+        const accepted = checkAcceptance(config, t.toState, newInputIndex, inputString.length, newStack);
         paths.push({ steps: [...steps, newStep], accepted });
       } else {
         queue.push(newConfig);

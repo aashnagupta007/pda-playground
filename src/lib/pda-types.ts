@@ -16,6 +16,8 @@ export interface PDATransition {
   stackPush: string; // ε for no push, or string of symbols to push (first char pushed last)
 }
 
+export type AcceptanceMode = 'final-state' | 'empty-stack' | 'both';
+
 export interface PDAConfig {
   id: string;
   name: string;
@@ -25,6 +27,7 @@ export interface PDAConfig {
   stackAlphabet: string[];
   startState: string;
   initialStackSymbol: string;
+  acceptanceMode: AcceptanceMode;
 }
 
 export interface SimulationStep {

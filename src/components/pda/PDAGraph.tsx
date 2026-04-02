@@ -34,9 +34,20 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
     return `${minX} ${minY} ${w} ${h}`;
   }, [layoutStates]);
 
-  const getTransitionPath = (t: PDATransition): { path: string; labelPos: { x: number; y: number } } => {
-    const from = layoutStates.find(s => s.id === t.fromState);
-    const to = layoutStates.find(s => s.id === t.toState);
+  // Group transitions by (from, to) pair for label stacking
+  const transitionGroups = useMemo(() => {
+    const groups = new Map<string, PDATransition[]>();
+    config.transitions.forEach(t => {
+      const key = `${t.fromState}->${t.toState}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(t);
+    });
+    return groups;
+  }, [config.transitions]);
+
+  const getGroupPath = (fromId: string, toId: string): { path: string; labelPos: { x: number; y: number } } => {
+    const from = layoutStates.find(s => s.id === fromId);
+    const to = layoutStates.find(s => s.id === toId);
     if (!from || !to) return { path: '', labelPos: { x: 0, y: 0 } };
 
     if (from.id === to.id) {
@@ -46,15 +57,7 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
       };
     }
 
-    // Group transitions between same pair to offset them
-    const sameDirectionTransitions = config.transitions.filter(
-      other => other.fromState === t.fromState && other.toState === t.toState
-    );
-    const indexInGroup = sameDirectionTransitions.indexOf(t);
-
-    const hasReverse = config.transitions.some(
-      other => other.id !== t.id && other.fromState === t.toState && other.toState === t.fromState
-    );
+    const hasReverse = transitionGroups.has(`${toId}->${fromId}`);
 
     const dx = to.x - from.x;
     const dy = to.y - from.y;
@@ -62,23 +65,20 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
     const nx = -dy / len;
     const ny = dx / len;
 
-    const baseOffset = hasReverse ? 30 : 0;
-    const groupOffset = (indexInGroup - (sameDirectionTransitions.length - 1) / 2) * 20;
-    const totalOffset = baseOffset + groupOffset;
+    const offset = hasReverse ? 25 : 0;
+    const mx = (from.x + to.x) / 2 + nx * offset;
+    const my = (from.y + to.y) / 2 + ny * offset;
 
-    const mx = (from.x + to.x) / 2 + nx * totalOffset;
-    const my = (from.y + to.y) / 2 + ny * totalOffset;
-
-    if (totalOffset !== 0) {
+    if (offset !== 0) {
       return {
         path: `M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`,
-        labelPos: { x: mx, y: my - 12 },
+        labelPos: { x: mx, y: my },
       };
     }
 
     return {
       path: `M ${from.x} ${from.y} L ${to.x} ${to.y}`,
-      labelPos: { x: (from.x + to.x) / 2 + nx * 15, y: (from.y + to.y) / 2 + ny * 15 - 8 },
+      labelPos: { x: (from.x + to.x) / 2 + nx * 15, y: (from.y + to.y) / 2 + ny * 15 },
     };
   };
 
@@ -134,45 +134,58 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
         </g>
       ))}
 
-      {/* Transitions */}
-      {config.transitions.map(t => {
-        const { path, labelPos } = getTransitionPath(t);
+      {/* Transitions - grouped by (from, to) pair */}
+      {Array.from(transitionGroups.entries()).map(([key, transitions]) => {
+        const first = transitions[0];
+        const { path, labelPos } = getGroupPath(first.fromState, first.toState);
         if (!path) return null;
-        const isActive = activeTransitionId === t.id;
-        const isSelf = t.fromState === t.toState;
+        const isSelf = first.fromState === first.toState;
+        const isAnyActive = transitions.some(t => activeTransitionId === t.id);
+        const lineHeight = 14;
+        const totalHeight = transitions.length * lineHeight + 6;
+        const labelWidth = 110;
+
         return (
-          <g key={t.id}>
+          <g key={key}>
             <path
               d={path}
               fill="none"
-              stroke={isActive ? 'hsl(var(--state-current))' : 'hsl(var(--transition-line))'}
-              strokeWidth={isActive ? 3 : 1.5}
-              markerEnd={`url(#${isSelf ? 'arrowhead-self' : 'arrowhead'}${isActive ? '-active' : ''})`}
+              stroke={isAnyActive ? 'hsl(var(--state-current))' : 'hsl(var(--transition-line))'}
+              strokeWidth={isAnyActive ? 3 : 1.5}
+              markerEnd={`url(#${isSelf ? 'arrowhead-self' : 'arrowhead'}${isAnyActive ? '-active' : ''})`}
               className="transition-all duration-300"
-              filter={isActive ? 'url(#glow)' : undefined}
+              filter={isAnyActive ? 'url(#glow)' : undefined}
             />
+            {/* Label background - offset away from the line */}
             <rect
-              x={labelPos.x - 50}
-              y={labelPos.y - 10}
-              width={100}
-              height={20}
+              x={labelPos.x - labelWidth / 2}
+              y={labelPos.y - totalHeight / 2 - 18}
+              width={labelWidth}
+              height={totalHeight}
               rx={4}
               fill="hsl(var(--card))"
               fillOpacity={0.95}
-              stroke={isActive ? 'hsl(var(--state-current))' : 'hsl(var(--border))'}
+              stroke={isAnyActive ? 'hsl(var(--state-current))' : 'hsl(var(--border))'}
               strokeWidth={0.5}
             />
-            <text
-              x={labelPos.x}
-              y={labelPos.y + 4}
-              textAnchor="middle"
-              fill={isActive ? 'hsl(var(--state-current))' : 'hsl(var(--foreground))'}
-              fontSize="11"
-              fontFamily="var(--font-mono)"
-              fontWeight={isActive ? 600 : 400}
-            >
-              {formatTransitionLabel(t)}
-            </text>
+            {transitions.map((t, i) => {
+              const isActive = activeTransitionId === t.id;
+              const ty = labelPos.y - totalHeight / 2 - 18 + 12 + i * lineHeight;
+              return (
+                <text
+                  key={t.id}
+                  x={labelPos.x}
+                  y={ty}
+                  textAnchor="middle"
+                  fill={isActive ? 'hsl(var(--state-current))' : 'hsl(var(--foreground))'}
+                  fontSize="10"
+                  fontFamily="var(--font-mono)"
+                  fontWeight={isActive ? 700 : 400}
+                >
+                  {formatTransitionLabel(t)}
+                </text>
+              );
+            })}
           </g>
         );
       })}

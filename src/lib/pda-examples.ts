@@ -19,6 +19,7 @@ export const EXAMPLE_PDAS: PDAConfig[] = [
     stackAlphabet: ['A', 'Z'],
     startState: 'q0',
     initialStackSymbol: 'Z',
+    acceptanceMode: 'final-state',
   },
   {
     id: 'palindrome',
@@ -40,6 +41,7 @@ export const EXAMPLE_PDAS: PDAConfig[] = [
     stackAlphabet: ['A', 'B', 'Z'],
     startState: 'q0',
     initialStackSymbol: 'Z',
+    acceptanceMode: 'final-state',
   },
   {
     id: 'balanced-parens',
@@ -59,5 +61,6 @@ export const EXAMPLE_PDAS: PDAConfig[] = [
     stackAlphabet: ['X', 'Z'],
     startState: 'q0',
     initialStackSymbol: 'Z',
+    acceptanceMode: 'final-state',
   },
 ];

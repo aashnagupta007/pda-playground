@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, SkipForward, RotateCcw, Pause, ChevronRight } from 'lucide-react';
+import { Play, SkipForward, SkipBack, RotateCcw, Pause, ChevronRight } from 'lucide-react';
+import { AcceptanceMode } from '@/lib/pda-types';
 import { motion } from 'framer-motion';
 
 const PDASimulator = () => {
@@ -51,6 +52,15 @@ const PDASimulator = () => {
     setCurrentStepIndex(prev => Math.min(prev + 1, currentPath.steps.length - 1));
   }, [currentPath]);
 
+  const stepBackward = useCallback(() => {
+    setCurrentStepIndex(prev => Math.max(prev - 1, 0));
+  }, []);
+
+  const updateAcceptanceMode = useCallback((mode: AcceptanceMode) => {
+    setConfig(prev => ({ ...prev, acceptanceMode: mode }));
+    reset();
+  }, [reset]);
+
   const autoRun = useCallback(() => {
     if (!isSimulated) {
       runSimulation();
@@ -89,19 +99,34 @@ const PDASimulator = () => {
           <h1 className="text-lg font-bold font-mono text-primary tracking-tight">PDA Simulator</h1>
           <span className="text-xs text-muted-foreground font-mono">Pushdown Automaton</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Label className="text-xs font-mono text-muted-foreground">Speed:</Label>
-          <Select value={speed.toString()} onValueChange={v => setSpeed(parseInt(v))}>
-            <SelectTrigger className="h-7 w-24 text-xs font-mono">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1200" className="text-xs font-mono">Slow</SelectItem>
-              <SelectItem value="800" className="text-xs font-mono">Normal</SelectItem>
-              <SelectItem value="400" className="text-xs font-mono">Fast</SelectItem>
-              <SelectItem value="150" className="text-xs font-mono">Turbo</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs font-mono text-muted-foreground">Acceptance:</Label>
+            <Select value={config.acceptanceMode} onValueChange={(v: AcceptanceMode) => updateAcceptanceMode(v)}>
+              <SelectTrigger className="h-7 w-32 text-xs font-mono">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="final-state" className="text-xs font-mono">Final State</SelectItem>
+                <SelectItem value="empty-stack" className="text-xs font-mono">Empty Stack</SelectItem>
+                <SelectItem value="both" className="text-xs font-mono">Either</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs font-mono text-muted-foreground">Speed:</Label>
+            <Select value={speed.toString()} onValueChange={v => setSpeed(parseInt(v))}>
+              <SelectTrigger className="h-7 w-24 text-xs font-mono">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1200" className="text-xs font-mono">Slow</SelectItem>
+                <SelectItem value="800" className="text-xs font-mono">Normal</SelectItem>
+                <SelectItem value="400" className="text-xs font-mono">Fast</SelectItem>
+                <SelectItem value="150" className="text-xs font-mono">Turbo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </header>
 
@@ -119,6 +144,9 @@ const PDASimulator = () => {
         <div className="flex items-center gap-1">
           <Button size="sm" onClick={runSimulation} className="h-8 text-xs font-mono gap-1">
             <Play className="w-3.5 h-3.5" /> Run
+          </Button>
+          <Button size="sm" variant="outline" onClick={stepBackward} disabled={!isSimulated || currentStepIndex <= 0} className="h-8 text-xs font-mono gap-1">
+            <SkipBack className="w-3.5 h-3.5" /> Prev
           </Button>
           <Button size="sm" variant="outline" onClick={stepForward} disabled={!isSimulated || currentStepIndex >= (currentPath?.steps.length ?? 0) - 1} className="h-8 text-xs font-mono gap-1">
             <SkipForward className="w-3.5 h-3.5" /> Step
