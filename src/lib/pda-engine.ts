@@ -116,8 +116,10 @@ export function simulatePDA(
       const newInputIndex =
         t.inputSymbol === EPSILON ? inputIndex : inputIndex + 1;
 
-      const consumedSymbol = t.inputSymbol === EPSILON ? EPSILON : inputString[inputIndex];
-      const description = `δ(${stateId}, ${consumedSymbol}, ${stackTop ?? EPSILON}) → (${t.toState}, ${t.stackPush})`;
+      const consumedSymbol = t.inputSymbol === EPSILON ? 'ε' : inputString[inputIndex];
+      const popSym = t.stackTop === EPSILON ? 'ε' : (stackTop ?? 'ε');
+      const pushSym = t.stackPush === EPSILON ? 'E' : t.stackPush;
+      const description = `δ(${stateId}, ${consumedSymbol}, ${popSym}) → (${t.toState}, ${pushSym})`;
 
       const newStep: SimulationStep = {
         stateId: t.toState,
