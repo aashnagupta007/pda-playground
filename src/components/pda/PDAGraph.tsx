@@ -34,9 +34,20 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
     return `${minX} ${minY} ${w} ${h}`;
   }, [layoutStates]);
 
-  const getTransitionPath = (t: PDATransition): { path: string; labelPos: { x: number; y: number } } => {
-    const from = layoutStates.find(s => s.id === t.fromState);
-    const to = layoutStates.find(s => s.id === t.toState);
+  // Group transitions by (from, to) pair for label stacking
+  const transitionGroups = useMemo(() => {
+    const groups = new Map<string, PDATransition[]>();
+    config.transitions.forEach(t => {
+      const key = `${t.fromState}->${t.toState}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(t);
+    });
+    return groups;
+  }, [config.transitions]);
+
+  const getGroupPath = (fromId: string, toId: string): { path: string; labelPos: { x: number; y: number } } => {
+    const from = layoutStates.find(s => s.id === fromId);
+    const to = layoutStates.find(s => s.id === toId);
     if (!from || !to) return { path: '', labelPos: { x: 0, y: 0 } };
 
     if (from.id === to.id) {
@@ -46,15 +57,7 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
       };
     }
 
-    // Group transitions between same pair to offset them
-    const sameDirectionTransitions = config.transitions.filter(
-      other => other.fromState === t.fromState && other.toState === t.toState
-    );
-    const indexInGroup = sameDirectionTransitions.indexOf(t);
-
-    const hasReverse = config.transitions.some(
-      other => other.id !== t.id && other.fromState === t.toState && other.toState === t.fromState
-    );
+    const hasReverse = transitionGroups.has(`${toId}->${fromId}`);
 
     const dx = to.x - from.x;
     const dy = to.y - from.y;
@@ -62,23 +65,20 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
     const nx = -dy / len;
     const ny = dx / len;
 
-    const baseOffset = hasReverse ? 30 : 0;
-    const groupOffset = (indexInGroup - (sameDirectionTransitions.length - 1) / 2) * 20;
-    const totalOffset = baseOffset + groupOffset;
+    const offset = hasReverse ? 25 : 0;
+    const mx = (from.x + to.x) / 2 + nx * offset;
+    const my = (from.y + to.y) / 2 + ny * offset;
 
-    const mx = (from.x + to.x) / 2 + nx * totalOffset;
-    const my = (from.y + to.y) / 2 + ny * totalOffset;
-
-    if (totalOffset !== 0) {
+    if (offset !== 0) {
       return {
         path: `M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`,
-        labelPos: { x: mx, y: my - 12 },
+        labelPos: { x: mx, y: my },
       };
     }
 
     return {
       path: `M ${from.x} ${from.y} L ${to.x} ${to.y}`,
-      labelPos: { x: (from.x + to.x) / 2 + nx * 15, y: (from.y + to.y) / 2 + ny * 15 - 8 },
+      labelPos: { x: (from.x + to.x) / 2 + nx * 15, y: (from.y + to.y) / 2 + ny * 15 },
     };
   };
 
