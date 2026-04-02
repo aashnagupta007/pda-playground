@@ -130,6 +130,9 @@ const PDASimulator = () => {
           <Button size="sm" onClick={runSimulation} className="h-8 text-xs font-mono gap-1">
             <Play className="w-3.5 h-3.5" /> Run
           </Button>
+          <Button size="sm" variant="outline" onClick={stepBackward} disabled={!isSimulated || currentStepIndex <= 0} className="h-8 text-xs font-mono gap-1">
+            <SkipBack className="w-3.5 h-3.5" /> Prev
+          </Button>
           <Button size="sm" variant="outline" onClick={stepForward} disabled={!isSimulated || currentStepIndex >= (currentPath?.steps.length ?? 0) - 1} className="h-8 text-xs font-mono gap-1">
             <SkipForward className="w-3.5 h-3.5" /> Step
           </Button>
