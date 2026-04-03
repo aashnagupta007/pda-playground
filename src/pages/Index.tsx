@@ -199,14 +199,14 @@ const PDASimulator = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left - Graph + Builder */}
         <div className="flex-1 flex flex-col border-r border-border min-w-0">
-          <div className="flex-1 relative">
+          <div className="h-[35%] min-h-[180px] relative">
             <PDAGraph
               config={config}
               currentStateId={currentStep?.stateId}
               activeTransitionId={currentStep?.transitionUsed?.id}
             />
           </div>
-          <div className="border-t border-border p-3 bg-card/50 max-h-[50%] overflow-auto">
+          <div className="border-t border-border p-3 bg-card/50 flex-1 overflow-auto">
             <PDABuilder config={config} onConfigChange={(c) => { setConfig(c); reset(); }} />
           </div>
         </div>

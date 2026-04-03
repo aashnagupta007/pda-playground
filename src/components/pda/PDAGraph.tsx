@@ -110,7 +110,7 @@ export function PDAGraph({ config, currentStateId, activeTransitionId }: PDAGrap
   const formatTransitionLabel = (t: PDATransition) => {
     const input = t.inputSymbol === EPSILON ? 'ε' : t.inputSymbol;
     const pop = t.stackTop === EPSILON ? 'ε' : t.stackTop;
-    const push = t.stackPush === EPSILON ? 'E' : t.stackPush;
+    const push = t.stackPush === EPSILON ? 'ε' : t.stackPush;
     return `${input}, ${pop} / ${push}`;
   };
 

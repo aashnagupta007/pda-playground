@@ -133,7 +133,7 @@ export function PDABuilder({ config, onConfigChange }: PDABuilderProps) {
       </div>
 
       {showBuilder && (
-        <div className="max-h-[400px] overflow-auto">
+        <div className="max-h-[60vh] overflow-auto">
           <div className="flex flex-col gap-4 pr-3">
             {/* States */}
             <div>
