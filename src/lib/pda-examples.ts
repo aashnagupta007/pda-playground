@@ -81,17 +81,18 @@ export const EXAMPLE_PDAS: PDAConfig[] = [
       { id: 'q1', label: 'q1', x: 350, y: 200, isStart: false, isAccepting: false },
     ],
     transitions: [
-      // Push phase: read symbols and push onto stack
-      { id: 't1', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'Z', stackPush: 'XZ' },
-      { id: 't2', fromState: 'q0', toState: 'q0', inputSymbol: 'b', stackTop: 'Z', stackPush: 'YZ' },
-      { id: 't3', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'X', stackPush: 'XX' },
-      { id: 't4', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'Y', stackPush: 'XY' },
+      // Accept empty string
+      { id: 't1', fromState: 'q0', toState: 'q0', inputSymbol: EPSILON, stackTop: 'Z', stackPush: EPSILON },
+      // Push phase
+      { id: 't2', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'Z', stackPush: 'XZ' },
+      { id: 't3', fromState: 'q0', toState: 'q0', inputSymbol: 'b', stackTop: 'Z', stackPush: 'YZ' },
+      { id: 't4', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'X', stackPush: 'XX' },
       { id: 't5', fromState: 'q0', toState: 'q0', inputSymbol: 'b', stackTop: 'X', stackPush: 'YX' },
-      { id: 't6', fromState: 'q0', toState: 'q0', inputSymbol: 'b', stackTop: 'Y', stackPush: 'YY' },
-      // Nondeterministic guess: switch to match phase (epsilon transitions)
-      { id: 't7', fromState: 'q0', toState: 'q1', inputSymbol: EPSILON, stackTop: 'X', stackPush: 'X' },
-      { id: 't8', fromState: 'q0', toState: 'q1', inputSymbol: EPSILON, stackTop: 'Y', stackPush: 'Y' },
-      { id: 't9', fromState: 'q0', toState: 'q1', inputSymbol: EPSILON, stackTop: 'Z', stackPush: 'Z' },
+      { id: 't6', fromState: 'q0', toState: 'q0', inputSymbol: 'a', stackTop: 'Y', stackPush: 'XY' },
+      { id: 't7', fromState: 'q0', toState: 'q0', inputSymbol: 'b', stackTop: 'Y', stackPush: 'YY' },
+      // Nondeterministic guess: start matching (consume + pop)
+      { id: 't8', fromState: 'q0', toState: 'q1', inputSymbol: 'a', stackTop: 'X', stackPush: EPSILON },
+      { id: 't9', fromState: 'q0', toState: 'q1', inputSymbol: 'b', stackTop: 'Y', stackPush: EPSILON },
       // Match phase: pop matching symbols
       { id: 't10', fromState: 'q1', toState: 'q1', inputSymbol: 'a', stackTop: 'X', stackPush: EPSILON },
       { id: 't11', fromState: 'q1', toState: 'q1', inputSymbol: 'b', stackTop: 'Y', stackPush: EPSILON },
